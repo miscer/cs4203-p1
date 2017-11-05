@@ -13,6 +13,9 @@ add_parser.add_argument('name')
 add_parser.add_argument('email')
 add_parser.add_argument('key')
 
+export_parser = subparsers.add_parser('export')
+export_parser.add_argument('email', nargs='?')
+
 encrypt_parser = subparsers.add_parser('encrypt')
 
 decrypt_parser = subparsers.add_parser('decrypt')
