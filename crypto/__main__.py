@@ -25,6 +25,9 @@ encrypt_parser.add_argument('input', nargs='?')
 encrypt_parser.add_argument('output', nargs='?')
 
 decrypt_parser = subparsers.add_parser('decrypt')
+decrypt_parser.add_argument('email')
+decrypt_parser.add_argument('input', nargs='?')
+decrypt_parser.add_argument('output', nargs='?')
 
 args = parser.parse_args()
 
