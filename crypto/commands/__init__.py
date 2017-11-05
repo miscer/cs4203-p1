@@ -3,6 +3,7 @@ from .add import run as run_add
 from .export import run as run_export
 from .encrypt import run as run_encrypt
 from .decrypt import run as run_decrypt
+from .list import run as run_list
 
 commands = {
     'setup': run_setup,
@@ -10,4 +11,5 @@ commands = {
     'export': run_export,
     'encrypt': run_encrypt,
     'decrypt': run_decrypt,
+    'list': run_list,
 }

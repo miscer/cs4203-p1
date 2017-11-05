@@ -29,6 +29,8 @@ decrypt_parser.add_argument('email')
 decrypt_parser.add_argument('input', nargs='?')
 decrypt_parser.add_argument('output', nargs='?')
 
+decrypt_parser = subparsers.add_parser('list')
+
 args = parser.parse_args()
 
 if args.command is None:
