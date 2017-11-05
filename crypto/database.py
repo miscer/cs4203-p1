@@ -1,8 +1,10 @@
+import os
 import peewee
 import nacl.public, nacl.encoding
 
 
-database = peewee.SqliteDatabase('crypto.db')
+db_file = os.environ.get('DATABASE', 'crypto.db')
+database = peewee.SqliteDatabase(db_file)
 
 
 class BaseModel(peewee.Model):
