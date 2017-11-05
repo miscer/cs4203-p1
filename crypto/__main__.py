@@ -1,4 +1,7 @@
 import argparse
+
+import sys
+
 from .commands import commands
 
 parser = argparse.ArgumentParser()
@@ -17,6 +20,9 @@ export_parser = subparsers.add_parser('export')
 export_parser.add_argument('email', nargs='?')
 
 encrypt_parser = subparsers.add_parser('encrypt')
+encrypt_parser.add_argument('email')
+encrypt_parser.add_argument('input', nargs='?')
+encrypt_parser.add_argument('output', nargs='?')
 
 decrypt_parser = subparsers.add_parser('decrypt')
 
