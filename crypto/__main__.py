@@ -1,5 +1,5 @@
 import argparse
-from crypto.commands import commands
+from .commands import commands
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(dest='command')
@@ -7,6 +7,11 @@ subparsers = parser.add_subparsers(dest='command')
 setup_parser = subparsers.add_parser('setup')
 setup_parser.add_argument('name')
 setup_parser.add_argument('--force', action='store_true')
+
+add_parser = subparsers.add_parser('add')
+add_parser.add_argument('name')
+add_parser.add_argument('email')
+add_parser.add_argument('key')
 
 encrypt_parser = subparsers.add_parser('encrypt')
 
