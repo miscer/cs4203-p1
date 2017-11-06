@@ -29,7 +29,13 @@ decrypt_parser.add_argument('email')
 decrypt_parser.add_argument('input', nargs='?')
 decrypt_parser.add_argument('output', nargs='?')
 
-decrypt_parser = subparsers.add_parser('list')
+list_parser = subparsers.add_parser('list')
+
+hash_parser = subparsers.add_parser('hash')
+hash_subparsers = hash_parser.add_subparsers(dest='hash_command')
+
+hash_generate = hash_subparsers.add_parser('generate')
+hash_generate.add_argument('input', nargs='?')
 
 args = parser.parse_args()
 
