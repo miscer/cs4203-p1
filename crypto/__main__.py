@@ -37,6 +37,10 @@ hash_subparsers = hash_parser.add_subparsers(dest='hash_command')
 hash_generate = hash_subparsers.add_parser('generate')
 hash_generate.add_argument('input', nargs='?')
 
+hash_check = hash_subparsers.add_parser('check')
+hash_check.add_argument('hash')
+hash_check.add_argument('input', nargs='?')
+
 args = parser.parse_args()
 
 if args.command is None:
