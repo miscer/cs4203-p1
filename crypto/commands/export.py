@@ -17,7 +17,6 @@ def run(args):
             print('You need to run setup first!')
             return
 
-        print('Your public key:')
         print_key(me.private_key.public_key)
     else:
         try:
@@ -26,5 +25,4 @@ def run(args):
             print('Nobody with email {} exists.'.format(args.email))
             return
 
-        print('Public key for {}:'.format(person.name))
         print_key(person.public_key)
