@@ -4,14 +4,6 @@ from peewee import DoesNotExist
 from ..models import Me, Person
 
 
-def get_me():
-    return Me.get()
-
-
-def get_person(email):
-    return Person.get(email=email)
-
-
 def print_key(key):
     encoded = key.encode(encoder=HexEncoder)
     print(encoded.decode('utf-8'))
@@ -20,7 +12,7 @@ def print_key(key):
 def run(args):
     if args.email is None:
         try:
-            me = get_me()
+            me = Me.get(profile=args.profile)
         except DoesNotExist:
             print('You need to run setup first!')
             return
@@ -29,7 +21,7 @@ def run(args):
         print_key(me.private_key.public_key)
     else:
         try:
-            person = get_person(args.email)
+            person = Person.get(email=args.email, profile=args.profile)
         except DoesNotExist:
             print('Nobody with email {} exists.'.format(args.email))
             return

@@ -10,7 +10,7 @@ def encode_key(key):
 
 
 def run(args):
-    people = Person.select()
+    people = Person.select().where(Person.profile == args.profile)
     rows = [(person.name, person.email, encode_key(person.public_key)) for person in people]
     table = format_smart_table(rows, ('Name', 'Email', 'Public Key'))
     print(table)

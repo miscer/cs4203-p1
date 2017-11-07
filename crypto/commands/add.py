@@ -4,8 +4,8 @@ from nacl.public import PublicKey
 from crypto.models import Person
 
 
-def create_person(name, email, public_key):
-    return Person.create(name=name, email=email, public_key=public_key)
+def create_person(name, email, public_key, profile):
+    return Person.create(name=name, email=email, public_key=public_key, profile=profile)
 
 
 def run(args):
@@ -15,5 +15,5 @@ def run(args):
         print('The key is not valid.')
         return
 
-    person = create_person(args.name, args.email, public_key)
+    person = create_person(args.name, args.email, public_key, args.profile)
     print('Added {}!'.format(person.name))

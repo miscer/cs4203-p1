@@ -5,6 +5,8 @@ import sys
 from .commands import commands
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--profile', default='default')
+
 subparsers = parser.add_subparsers(dest='command')
 
 setup_parser = subparsers.add_parser('setup')

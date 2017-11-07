@@ -5,19 +5,15 @@ from peewee import DoesNotExist
 from ..models import Me, Person
 
 
-def get_me():
-    return Me.get()
-
-
 def run(args):
     try:
-        me = Me.get()
+        me = Me.get(profile=args.profile)
     except DoesNotExist:
         print('You need to run setup first!')
         return
 
     try:
-        recipient = Person.get(email=args.email)
+        recipient = Person.get(email=args.email, profile=args.profile)
     except DoesNotExist:
         print('Nobody with email {} exists.'.format(args.email))
         return

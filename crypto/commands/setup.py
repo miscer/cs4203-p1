@@ -6,24 +6,24 @@ from nacl.public import PrivateKey
 from crypto.models import Me
 
 
-def get_me() -> Optional[Me]:
+def get_me(profile) -> Optional[Me]:
     try:
-        return Me.get()
+        return Me.get(profile=profile)
     except peewee.DoesNotExist:
         return None
 
 
-def create_me(name):
+def create_me(name, profile):
     private_key = PrivateKey.generate()
-    return Me.create(name=name, private_key=private_key)
+    return Me.create(name=name, private_key=private_key, profile=profile)
 
 
 def run(args):
-    me = get_me()
+    me = get_me(args.profile)
 
     if me is None or args.force:
-        Me.delete().execute()
-        me = create_me(args.name)
+        Me.delete().where(Me.profile == args.profile).execute()
+        me = create_me(args.name, args.profile)
 
         print('Hello {}!'.format(me.name))
         print('Your keys are now saved.')
