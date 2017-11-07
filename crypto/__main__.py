@@ -34,6 +34,8 @@ decrypt_parser.add_argument('output', nargs='?')
 list_parser = subparsers.add_parser('list')
 
 hash_parser = subparsers.add_parser('hash')
+hash_parser.add_argument('--hasher', choices=('sha256', 'sha512', 'blake2b'), default='blake2b')
+
 hash_subparsers = hash_parser.add_subparsers(dest='hash_command')
 
 hash_generate = hash_subparsers.add_parser('generate')
