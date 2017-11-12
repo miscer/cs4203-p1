@@ -215,4 +215,6 @@ I also ran OpenVAS using the built-in wizard. The scanning took over 40 minutes 
 
 One vulnerability is that the HTTPS server on port 443 allows vulnerable cipher suites. The attacks on these ciphers are known as Sweet32. Other vulnerabilities are related - weak cipher suites are allowed on the same HTTPS server, deprecated SSL protocol detection and insufficient group strength in Diffie-Hellman key-exchange.
 
+Finally I tried to use DMitry to find out more information about the website, however it did not find any new subdomains or email addresses.
+
 Overall I found these tools very easy to use. Both had a simple "enter URL here" field that performs a comprehensive scan. The results were easy to understand and each vulnerability had a description. OpenVAS even includes links to the CVE database for found vulnerabilities.
