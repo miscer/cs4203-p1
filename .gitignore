@@ -12,3 +12,6 @@ vendor
 
 # Temp
 /tmp
+
+# Report
+*.pdf
