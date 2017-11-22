@@ -173,11 +173,11 @@ For example, I haven't found a way to use a different algorithm for encryption/d
 
 ## Testing
 
-The program is tested using [Cucumber](https://cucumber.io/) and [aruba](https://github.com/cucumber/aruba). Using these lets me define the behaviour of the whole program, including the command line inputs and output.
+The program is tested with acceptance tests using [Cucumber](https://cucumber.io/) and [aruba](https://github.com/cucumber/aruba). Using these lets me define the behaviour of the whole program, including the command line inputs and output.
 
 I have not used unit tests, as the whole program is a simple wrapper around libsodium and peewee. Both of these libraries have an extensive test suite.
 
-For example, the specification for the `setup` command is:
+The tests are written in Gherkin, which is a programming language designed to be readable by non-developers too. For example, the specification for the `setup` command is:
 
 ```
 Feature: Setting up
@@ -224,13 +224,15 @@ Implemented test cases are:
 - Listing added keys
 - Setting up
 
+![Output of Cucumber showing all tests](figures/cucumber.png)
+
 # Part 2
 
 ## Content analysis
 
 I started the analysis by looking the source of cybertest.uk.
 
-The website is served through HTTP and not through HTTPS. I would say this is the most serious vulnerability on the website, especially since it is an e-shop. An attacker could performa a MITM attack and sniff out the user's credentials when logging in on the site, or steal the authentication cookie and use it to access the user's account. This problem is solved relatively easy, by setting up HTTPS on the website. In the past this required buying a certificate and setting it up, but today Let's Encrypt can be used to automatically obtain and update a free certificate.
+The website is served through HTTP and not through HTTPS. I would say this is the most serious vulnerability on the website, especially since it is an e-shop. An attacker could perform a MITM attack and sniff out the user's credentials when logging in on the site, or steal the authentication cookie and use it to access the user's account. This problem is solved relatively easy, by setting up HTTPS on the website. In the past this required buying a certificate and setting it up, but today Let's Encrypt can be used to automatically obtain and update a free certificate.
 
 The first potential vulnerability in the content is right at the start of the page: a CSS file is loaded from `http://www.w3schools.com`. HTTP is used instead of HTTPS, making it possible to perform a MITM attack and send a different stylesheet. Alternatively, the attacker could steal the w3schools.com domain once it expires and serve the stylesheet from their own server. The stylesheet could then execute arbitrary JavaScript code in some browsers, performing an XSS attack:
 
@@ -248,17 +250,27 @@ The use of `innerHTML` could be problematic if it used some other way to retriev
 
 There seems to be some username and password included in the website comments (user: testuser@cybertest.uk, test underscore user1). This was probably left behind by the website administrator when setting up the site. If these are real credentials, it would be easy to check where it will work (SSH, FTP, website admin UI etc.). The credentials should be removed immediately and the password changed to a different, stronger one.
 
+![Credentials in comments](figures/comment_credentials.png)
+
 The page source contains URLs of three other pages on the same domain that appear to have dynamic content.
 
 The first one is http://cybertest.uk/Server/AboutUs.asp, which while having the `.asp` extension used by ASP, shows only static content. The content in this case seems to be ASP source code, hinting that the server might be misconfigured and not serving dynamic pages correctly.
 
 The second one is http://cybertest.uk/modified-shop/. This page shows alternately two types of errors - Internal Server Error with 500 HTTP response status code, and "There was an error!" with 503 HTTP status code. The source of these error pages does not show any vulnerabilities, however the internal server error message mentions the email ishbelduncan@hotmail.com. This could be used to direct an email phishing attack at the website administrator.
 
-The last one is http://cybertest.uk/phpbook/guestbook.php, which contains a dynamic guestbook where visitor can add comments that are then displayed on the page. phpBook version 1.50 is used, which is described in more detail below.
+![Broken link to e-shop](figures/broken_link.png)
 
-Source of the guestbook does not show anything suspicious, however I have noticed one potential attack vector. It seems that it is possible to include a SWF file in the comments, and this is then shown to all visitors.
+![Error instead of the e-shop](figures/shop_error.png)
+
+The last one is http://cybertest.uk/phpbook/guestbook.php, which contains a dynamic guestbook where visitor can add comments that are then displayed on the page.
+
+Source of the guestbook does not show anything suspicious, however I have noticed one potential attack vector. It seems that it is possible to include a SWF file in the comments, and this file is then shown to all visitors.
 
 SWF files can run Adobe Flash programs. Flash has been a source of many vulnerabilities and Adobe plans to stop updating and distributing it by the end of 2020 (@adobeflash). Having the possibility of including any user-supplied Flash file is a large security risk as it lets attackers use the vulnerabilities to gain access to visitors' computers.
+
+![Inserting SWF files in guestbook](figures/guestbook_flash.png)
+
+I also tried to find the source code for the guestbook, but I was not able to, as the software seems to be very old and not accessible anymore.
 
 ## Network analysis
 
@@ -271,6 +283,8 @@ nmap -T3 -A -v cybertest.uk
 This revealed multiple services running on the server: FTP, SMTP, IMAP, POP3, HTTP, HTTPS and MySQL. nmap also obtained the softwares and versions used, decribed below.
 
 One interesting thing is that there is another HTTP server running on port 8443, that simply redirects to https://server.3-mountainsbansko.co.uk:8443. This domain is available to be registered - if http://cybertest.co.uk:8443 was used for something important, the attacker could register the 3-mountainsbansko.co.uk domain and serve malicious content from it.
+
+![Output from Zenmap](figures/nmap.png)
 
 I would recommend revising services running on the server and leaving only the most important ones running. Any other domains used by the system should not be let to expire.
 
@@ -308,6 +322,8 @@ First I tried to use OWASP ZAP to analyse the content on cybertest.uk. It only s
 `X-XSS-Protection` enables or disables XSS filter in some browsers. This filter tries to mitigate XSS attacks by detecting when malicious JavaScript code has been injected into a website.
 
 `X-Content-Type-Options` prevents MIME confusion attacks by forcing the browser to respect the value of the `Content-Type` header for JavaScript and CSS files and not using sniffing to guess the content type.
+
+![Output of OWASP ZAP](figures/owasp_zap.png)
 
 I also ran OpenVAS using the built-in wizard. The scanning took over 40 minutes and it found 117 vulnerabilities, but only 13 of then had Quality of Detection more than 70% (Quality of Detection is a measure for how reliable the vulnerability detection is). All of these had medium severity.
 
