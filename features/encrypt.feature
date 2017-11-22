@@ -38,16 +38,23 @@ Feature: Encrypting and Decrypting
       | puppy.jpg  |
       | spec.pdf   |
 
-  Scenario: Encrypting nonexistent file
+  Scenario: Encrypting a nonexistent file
     When I run `python -m crypto --profile alice encrypt bob@example.com file.txt message.enc`
     Then it should fail with:
     """
     File does not exist
     """
 
-  Scenario: Decrypting nonexistent file
+  Scenario: Decrypting a nonexistent file
     When I run `python -m crypto --profile alice decrypt bob@example.com message.enc file.txt`
     Then it should fail with:
     """
     File does not exist
     """
+
+  Scenario: Encrypting a large file
+    Given a 100000000 byte file named "input.txt"
+    When I run `python -m crypto --profile alice encrypt bob@example.com input.txt message.enc`
+    Then the output should not contain anything
+      And the exit status should be 0
+      And the file "message.enc" should exist

@@ -210,12 +210,12 @@ The instructions for running the test suite are in the README file.
 
 Implemented test cases are:
 
-- Adding a public key
+- Adding a valid and invalid public key
 - Encrypting and decrypting files of various types and sizes
   - JPEG images, text files, PDF files
 - Encrypting and decrypting nonexistent files
 - Exporting my public key
-- Exporting other's public keys
+- Exporting others' public keys
 - Generating a hash using different algorithms
 - Generating a hash for large files
 - Checking a correct hash

@@ -44,3 +44,8 @@ Feature: Hashing
     """
     File does not exist
     """
+
+  Scenario: Hashing a large file
+    Given a 100000000 byte file named "input.txt"
+    When I run `python -m crypto hash generate input.txt`
+    Then the exit status should be 0
