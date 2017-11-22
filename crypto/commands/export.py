@@ -15,7 +15,7 @@ def run(args):
             me = Me.get(profile=args.profile)
         except DoesNotExist:
             print('You need to run setup first!')
-            return
+            return 1
 
         print_key(me.private_key.public_key)
     else:
@@ -23,6 +23,6 @@ def run(args):
             person = Person.get(email=args.email, profile=args.profile)
         except DoesNotExist:
             print('Nobody with email {} exists.'.format(args.email))
-            return
+            return 1
 
         print_key(person.public_key)

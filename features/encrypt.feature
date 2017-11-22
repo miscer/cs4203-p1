@@ -17,14 +17,37 @@ Feature: Encrypting and Decrypting
     """
     Then the output should contain "Hello, CS4203!"
 
-  Scenario: Encrypting and decrypting files
-    Given a file named "input.txt" with:
+  Scenario Outline: Generating a hash
+    Given I use a fixture named "files"
+
+    When I cd to ".."
+      And I run the following commands:
+      """bash
+      python -m crypto --profile alice encrypt bob@example.com files/<file> message.enc
+      python -m crypto --profile bob decrypt alice@example.com message.enc output
+      """
+
+    Then the output should not contain anything
+      And the file "message.enc" should exist
+      And the file "output" should exist
+      And the file "files/<file>" should be equal to file "output"
+
+    Examples:
+      | file       |
+      | hello.txt  |
+      | puppy.jpg  |
+      | spec.pdf   |
+
+  Scenario: Encrypting nonexistent file
+    When I run `python -m crypto --profile alice encrypt bob@example.com file.txt message.enc`
+    Then it should fail with:
     """
-    Hello, CS4203!
+    File does not exist
     """
-    When I run the following commands:
-    """bash
-    python -m crypto --profile alice encrypt bob@example.com input.txt message.enc
-    python -m crypto --profile bob decrypt alice@example.com message.enc output.txt
+
+  Scenario: Decrypting nonexistent file
+    When I run `python -m crypto --profile alice decrypt bob@example.com message.enc file.txt`
+    Then it should fail with:
     """
-    Then the file "output.txt" should contain "Hello, CS4203!"
+    File does not exist
+    """

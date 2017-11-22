@@ -18,16 +18,26 @@ def run(args):
     hasher = hashers[args.hasher]
 
     if args.hash_command == 'generate':
-        input_file = open(args.input, 'rb') if args.input else sys.stdin.buffer
+        try:
+            input_file = open(args.input, 'rb') if args.input else sys.stdin.buffer
+        except FileNotFoundError:
+            print('File does not exist')
+            return 1
+
         file_hash = generate_file_hash(input_file, hasher)
         print(file_hash.decode('utf-8'))
 
     elif args.hash_command == 'check':
-        input_file = open(args.input, 'rb') if args.input else sys.stdin.buffer
+        try:
+            input_file = open(args.input, 'rb') if args.input else sys.stdin.buffer
+        except FileNotFoundError:
+            print('File does not exist')
+            return 1
+
         file_hash = generate_file_hash(input_file, hasher)
 
         if file_hash.decode('utf-8') == args.hash:
             print('All good!')
         else:
             print('Watch out, something is fishy here!')
-
+            return 1

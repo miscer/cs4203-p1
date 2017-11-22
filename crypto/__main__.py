@@ -51,4 +51,7 @@ if args.command is None:
     parser.print_usage()
 else:
     run_command = commands[args.command]
-    run_command(args)
+    status = run_command(args)
+
+    if isinstance(status, int):
+        exit(status)

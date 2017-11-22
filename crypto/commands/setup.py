@@ -30,4 +30,4 @@ def run(args):
     else:
         print('Crypto is already set up.')
         print('Use the --force flag to set it up again.')
-
+        return 1

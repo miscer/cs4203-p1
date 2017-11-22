@@ -13,7 +13,7 @@ def run(args):
         public_key = PublicKey(args.key, HexEncoder)
     except:
         print('The key is not valid.')
-        return
+        return 1
 
     person = create_person(args.name, args.email, public_key, args.profile)
     print('Added {}!'.format(person.name))

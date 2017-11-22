@@ -79,15 +79,97 @@ bc04ffec0bd77a8033b75d03dbfc79ae1743bea847b9edf8de161904e6fb486e
 
 ### Encrypting and decrypting
 
+Once we have other people's public keys stored in the database, we can encrypt messages or files that only they will be able to decrypt using the `encrypt` command:
+
+```
+$ python -m crypto encrypt bob@example.com input.txt message.enc
+```
+
+This will read the file in `input.txt`, encrypt it using Bob's public key, and write the encrypted data into `message.enc`.
+
+Bob can decrypt the file with the `decrypt` command:
+
+```
+python -m crypto decrypt alice@example.com message.enc output.txt
+```
+
+This will read the encrypted data in `message.enc`, decrypt it and put the result to `output.txt`. The sender has to be specified to be able to decrypt the file - it is not possible without their public key.
+
 ### Hashing
+
+The system can calculate and check hashes of messages. To calculate the hash, we can use the `hash generate` command:
+
+```
+$ python -m crypto hash generate input.txt
+2c9eabe7c88318810f1b29cf20382e1439c87241bf08ec54aa10ad2999e446ee
+```
+
+Once we have the hash, we can verify a file with `hash check`: (hash trimmed to fit the page)
+
+```
+$ python -m crypto hash check 2c9eabe7... input.txt
+All good!
+
+$ python -m crypto hash check 23480928... input.txt
+Watch out, something is fishy here!
+```
+
+It is possible to specify the algorithm used for hashing:
+
+```
+$ python -m crypto hash generate --hasher sha256 input.txt
+2c9eabe7c88318810f1b29cf20382e1439c87241bf08ec54aa10ad2999e446ee
+```
+
+The options are SHA256, SHA512 and BLAKE2b. If no algorithm is specified, BLAKE2b is used by default.
 
 ## Implementation
 
+### Commands
+
+For parsing the command line arguments I used the Python built-in `argparse` library. It allowed me to define commands and subcommands with their optional and required parameters. It is also able to generate a help message when the program is run with the `--help` parameter:
+
+```
+$ python -m crypto --help
+```
+
+Each command is stored in a separate file, which contains a `run` function. The function takes the parsed arguments as a parameter, and accesses the database, reads/writes files or uses PyNaCl to encrypt/decrypt messages or calculate hashes.
+
+### Data storage
+
+I used SQLite for storing public and private keys. The database has two tables - people and me.
+
+People stores data about other people, with whom the user is exchanging encrypted messages. The table stores the person's name, email address and public key.
+
+Me stores data about the user. It contains the name and the private key.
+
+This database is not encrypted, so if an attacker gained access to it, they would be able to extract the user's private key. An improvement to the system would be to encrypt the database using a passphrase, which would be then entered by the user when using the system, or optionally stored in the system's keychain.
+
+I used the peeweee ORM library for using the database. This allowed me to simplify the program by not worrying about the SQL syntax and converting to and from database types.
+
+I had to implement two new types of model fields, for private and public keys. These use the regular `char` database type and store the private/public key encoded as a hexadecimal value. When retrieving the data, the keys are decoded and converted into PyNaCl's `PrivateKey`/`PublicKey` instances.
+
+### libsodium
+
 I found libsodium to be extremely easy to use. The documentation for the Python bindings is well written and includes clear examples.
 
-Boxes are used as an analogy for sending encrypted messages.
+Boxes are used as an analogy for sending encrypted messages. A box is created using a private and public key. These are either sender's and receiver's, or vice versa. There are two methods for encrypting and decrypting messages.
 
-However, I think that while the library is very easy for simple systems like this one, it would be more difficult to apply it to more specialised systems. For example, I haven't found a way to use a different algorithm for encryption/decryption, or how to change parameters of the used algorithms.
+For example, if Alice receives a message sent by Bob, she can decrypt it as shown below.
+
+```
+alice_sk = PrivateKey.generate()
+bob_pk = get_bobs_key()
+
+box = Box(alice_sk, bob_pk)
+decrypted_message = box.decrypt(encrypted_message)
+```
+
+This analogy was enough to implement this system, since we are using asymmetric keys to encrypt messages that only the recipient can decrypt.
+
+While I think that the library is very easy for simple systems like this one, it would be more difficult to apply it to more specialised systems.
+
+For example, I haven't found a way to use a different algorithm for encryption/decryption, or how to change parameters of the used algorithms. Therefore my system supports only Curve25519 for generating keys and encrypting/decrypting messages.
 
 ## Testing
 
@@ -125,6 +207,22 @@ Feature: Hashing
 ```
 
 The instructions for running the test suite are in the README file.
+
+Implemented test cases are:
+
+- Adding a public key
+- Encrypting and decrypting files of various types and sizes
+  - JPEG images, text files, PDF files
+- Encrypting and decrypting nonexistent files
+- Exporting my public key
+- Exporting other's public keys
+- Generating a hash using different algorithms
+- Generating a hash for large files
+- Checking a correct hash
+- Checking an incorrect hash
+- Hashing and checking nonexistent files
+- Listing added keys
+- Setting up
 
 # Part 2
 

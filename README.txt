@@ -10,4 +10,4 @@ Then install the dependencies:
 
 Then run the tests:
 
-    $ bundle exec cucumber
+    $ PYTHONPATH=$(pwd) bundle exec cucumber

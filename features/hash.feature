@@ -30,3 +30,17 @@ Feature: Hashing
     """
     When I run `python -m crypto hash check abc file.txt`
     Then the output should contain "something is fishy"
+
+  Scenario: Generating a hash of a nonexistent file
+    When I run `python -m crypto hash generate file.txt`
+    Then it should fail with:
+    """
+    File does not exist
+    """
+
+  Scenario: Checking a hash of a nonexistent file
+    When I run `python -m crypto hash check abc123 file.txt`
+    Then it should fail with:
+    """
+    File does not exist
+    """
