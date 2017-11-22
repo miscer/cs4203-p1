@@ -3,6 +3,7 @@ title: CS4203 Practical 2
 author: 140015533
 date: 27 November 2017
 bibliography: bibliography.bib
+reference-section-title: References
 toc: true
 ---
 
@@ -12,7 +13,7 @@ toc: true
 
 In this part of the practical the task was to implement a simple system for encrypting messages.
 
-I have decided to use libsodium for my system. My implementation is in Python, and I am using [PyNaCl](https://pynacl.readthedocs.io/en/latest/) for Python bindings for libsodium.
+I decided to use libsodium for my system. My implementation is in Python, and I am using [PyNaCl](https://pynacl.readthedocs.io/en/latest/) for Python bindings for libsodium.
 
 ## Design
 
@@ -38,7 +39,7 @@ Your keys are now saved.
 
 ### Managing public keys
 
-In order to be able to encrypt a message that only the recipient can decrypt, we need to obtain and remember their public key. Once we have it and encrypt a message using the public key, only the recipient's private key can be used for decryption.
+In order to be able to encrypt a message that only the recipient can decrypt, we need to obtain and remember their public key. Once we have it and we encrypt a message using the public key, only the recipient's private key can be used for decryption.
 
 The system can store, list and export public keys.
 
@@ -93,9 +94,9 @@ Bob can decrypt the file with the `decrypt` command:
 python -m crypto decrypt alice@example.com message.enc output.txt
 ```
 
-This will read the encrypted data in `message.enc`, decrypt it and put the result to `output.txt`. The sender has to be specified to be able to decrypt the file - it is not possible without their public key.
+This will read the encrypted data in `message.enc`, decrypt it and put the result in `output.txt`. The sender has to be specified to be able to decrypt the file - it is not possible without their public key.
 
-### Hashing
+### Hashing
 
 The system can calculate and check hashes of messages. To calculate the hash, we can use the `hash generate` command:
 
@@ -133,15 +134,15 @@ For parsing the command line arguments I used the Python built-in `argparse` lib
 $ python -m crypto --help
 ```
 
-Each command is stored in a separate file, which contains a `run` function. The function takes the parsed arguments as a parameter, and accesses the database, reads/writes files or uses PyNaCl to encrypt/decrypt messages or calculate hashes.
+Each command is stored in a separate file, which contains a `run` function. The function takes the parsed arguments as a parameter, and accesses the database, reads/writes files or uses PyNaCl to encrypt/decrypt messages or calculates hashes.
 
 ### Data storage
 
-I used SQLite for storing public and private keys. The database has two tables - people and me.
+I used SQLite for storing public and private keys. The database has two tables - `people` and `me`.
 
-People stores data about other people, with whom the user is exchanging encrypted messages. The table stores the person's name, email address and public key.
+`people` stores data about other people, with whom the user is exchanging encrypted messages. The table stores the person's name, email address and public key.
 
-Me stores data about the user. It contains the name and the private key.
+`me` stores data about the user. It contains the name and the private key.
 
 This database is not encrypted, so if an attacker gained access to it, they would be able to extract the user's private key. An improvement to the system would be to encrypt the database using a passphrase, which would be then entered by the user when using the system, or optionally stored in the system's keychain.
 
@@ -175,7 +176,7 @@ For example, I haven't found a way to use a different algorithm for encryption/d
 
 The program is tested with acceptance tests using [Cucumber](https://cucumber.io/) and [aruba](https://github.com/cucumber/aruba). Using these lets me define the behaviour of the whole program, including the command line inputs and output.
 
-I have not used unit tests, as the whole program is a simple wrapper around libsodium and peewee. Both of these libraries have an extensive test suite.
+I did not use unit tests, as the whole program is a simple wrapper around libsodium and peewee. Both of these libraries have an extensive test suite.
 
 The tests are written in Gherkin, which is a programming language designed to be readable by non-developers too. For example, the specification for the `setup` command is:
 
@@ -212,7 +213,7 @@ Implemented test cases are:
 
 - Adding a valid and invalid public key
 - Encrypting and decrypting files of various types and sizes
-  - JPEG images, text files, PDF files
+    - JPEG images, text files, PDF files
 - Encrypting and decrypting nonexistent files
 - Exporting my public key
 - Exporting others' public keys
@@ -228,9 +229,11 @@ Implemented test cases are:
 
 # Part 2
 
+In this part I used a browser to explore the website and its source code, and then various tools available in Kali Linux to do a more thorough analysis.
+
 ## Content analysis
 
-I started the analysis by looking the source of cybertest.uk.
+I started the analysis by looking at the source of cybertest.uk.
 
 The website is served through HTTP and not through HTTPS. I would say this is the most serious vulnerability on the website, especially since it is an e-shop. An attacker could perform a MITM attack and sniff out the user's credentials when logging in on the site, or steal the authentication cookie and use it to access the user's account. This problem is solved relatively easy, by setting up HTTPS on the website. In the past this required buying a certificate and setting it up, but today Let's Encrypt can be used to automatically obtain and update a free certificate.
 
@@ -266,15 +269,17 @@ The last one is http://cybertest.uk/phpbook/guestbook.php, which contains a dyna
 
 Source of the guestbook does not show anything suspicious, however I have noticed one potential attack vector. It seems that it is possible to include a SWF file in the comments, and this file is then shown to all visitors.
 
-SWF files can run Adobe Flash programs. Flash has been a source of many vulnerabilities and Adobe plans to stop updating and distributing it by the end of 2020 (@adobeflash). Having the possibility of including any user-supplied Flash file is a large security risk as it lets attackers use the vulnerabilities to gain access to visitors' computers.
+SWF files can run Adobe Flash programs. Flash has been a source of many vulnerabilities and Adobe plans to stop updating and distributing it by the end of 2020 @adobeflash. Having the possibility of including any user-supplied Flash file is a large security risk as it lets attackers use the vulnerabilities to gain access to visitors' computers.
 
 ![Inserting SWF files in guestbook](figures/guestbook_flash.png)
 
+I would recommend disabling inserting SWF files in the guestbook.
+
 I also tried to find the source code for the guestbook, but I was not able to, as the software seems to be very old and not accessible anymore.
 
-## Network analysis
+## Network analysis
 
-After analysing the content of the page, I have focused on services other than the web server. For this I used `nmap` with the following options:
+After analysing the content of the page, I focused on services other than the web server. For this I used `nmap` with the following options:
 
 ```
 nmap -T3 -A -v cybertest.uk
@@ -292,7 +297,7 @@ Looking at the DNS records for cybertest.uk we can see that there is one MX reco
 
 Whois information tells us that the domain is registered by Ishbel Duncan - this could be useful for phishing attacks, where the attacker could pretend to be the website owner using the information from whois.
 
-## Software analysis
+## Software analysis
 
 Knowing which software is used and the exact versions can be very helpful for the attacker. Using that information they are able to find and exploit known vulnerabilities in the used software. Even if these are patched in the software, unless it is updated on the server, it is still vulnerable.
 
@@ -313,9 +318,9 @@ I would recommend always having up-to-date software installed on the server, and
 
 ## Automated analysis
 
-Finally, I have tried to use vulnerability scanning tools to find other attack vectors.
+Finally, I tried to use vulnerability scanning tools to find other attack vectors.
 
-First I tried to use OWASP ZAP to analyse the content on cybertest.uk. It only showed alerts about missing security-related headers. These are `X-Frame-Options`, `X-XSS-Protection` and `X-Content-Type-Options`.
+First, I tried to use OWASP ZAP to analyse the content on cybertest.uk. It only showed alerts about missing security-related headers. These are `X-Frame-Options`, `X-XSS-Protection` and `X-Content-Type-Options`.
 
 `X-Frame-Options` specifies whether the page can be loaded in an `<iframe>` tag inside another page. Disallowing this will for example prevent the attacker from including the e-shop checkout page on another page, overlaying it with other elements, showing only the "purchase" button, and misleading the user.
 
@@ -329,6 +334,14 @@ I also ran OpenVAS using the built-in wizard. The scanning took over 40 minutes 
 
 One vulnerability is that the HTTPS server on port 443 allows vulnerable cipher suites. The attacks on these ciphers are known as Sweet32. Other vulnerabilities are related - weak cipher suites are allowed on the same HTTPS server, deprecated SSL protocol detection and insufficient group strength in Diffie-Hellman key-exchange.
 
-Finally I tried to use DMitry to find out more information about the website, however it did not find any new subdomains or email addresses.
+Finally, I tried to use DMitry to find out more information about the website, however it did not find any new subdomains or email addresses.
 
-Overall I found these tools very easy to use. Both had a simple "enter URL here" field that performs a comprehensive scan. The results were easy to understand and each vulnerability had a description. OpenVAS even includes links to the CVE database for found vulnerabilities.
+Overall I found these tools very easy to use. All of them had a simple "enter URL here" field that performs a comprehensive scan. The results were easy to understand and each vulnerability had a description. OpenVAS even includes links to the CVE database for found vulnerabilities.
+
+# Conclusion
+
+In the first part of this practical I used the PyNaCl library to implement a simple system for encrypted communication between two people. The system is able to manage public and private keys, encrypt and decrypt messages, and check the integrity of a file.
+
+In the second part I conducted a security analysis of the cybertest.uk website. The analysis showed a number of flaws, from minor things such as missing security headers and broken links, to a relatively major problem, where an attacker is able to upload arbitrary SWF files to the website. I also scanned the server hosting the website and found a number of other services, such as a MySQL database, FTP, IMAP and SMTP servers.
+
+While doing this practical I learned more about crypto libraries, and the tools used for security analysis.
